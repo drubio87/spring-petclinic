@@ -14,7 +14,7 @@ steps:
 - checkout: none
   persistCredentials: true
 - script: |
-    git clone https://$(AZUREDEVOPS_PAT)@dev.azure.com/JCMTechnologies/TestGithubDevOps/_git/TestGithubDevOps
+    git clone https://$(DEVOPS_PAT)@dev.azure.com/JCMTechnologies/TestGithubDevOps/_git/TestGithubDevOps
   displayName: 'Clone source repositoy'
   env:
     DEVOPS_PAT: $(DEVOPS_PAT)
