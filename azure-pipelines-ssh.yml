@@ -1,0 +1,90 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+#Step 1: Checkout AzureDevops repository
+- checkout: none
+  persistCredentials: true
+- script: |
+    git clone https://$(DEVOPS_PAT)@dev.azure.com/JCMTechnologies/SyncGithubProject/_git/SyncGithubProject
+  displayName: 'Clone source repositoy'
+  env:
+    DEVOPS_PAT: $(DEVOPS_PAT)
+
+# Step 2: Configure Git for pushing
+- script: |
+    git config --global user.email "drubio@jcm-tech.com"
+    git config --global user.name "drubio87"
+  displayName: "Configure Git"
+
+# Step 3: Create a new branch (use a unique branch name)
+- script: |
+    cd SyncGithubProject
+    git checkout -b feature/azure-pipeline-$(Build.BuildId)
+  displayName: "Create new branch"
+
+# Step 4: Download the secure file
+- task: DownloadSecureFile@1
+  inputs:
+    secureFile: 'github_key'
+
+#Step Debug: Check Agent Temp Directory contents
+- script: |
+    ls -la $(Agent.TempDirectory)
+  displayName: 'Debug Temp Directory'
+
+# Step 4: Setub SSH Key
+- script: |
+    mkdir -p ~/.ssh
+    if [ -f "$(Agent.TempDirectory)/github_key" ]; then
+        cp $(Agent.TempDirectory)/github_key ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+    else
+        echo "SSH key not found in $(Agent.TempDirectory)/github_key" && exit 1
+    fi
+    echo "Host github.com" >> ~/.ssh/config
+    echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+  displayName: "Setup SSH Key"
+     
+
+# Step 5: Push changes to the new branch on GitHub
+- script: |
+     cd SyncGithubProject
+     git remote add github git@github.com:drubio87/spring-petclinic.git
+     git push --no-thin github feature/azure-pipeline-$(Build.BuildId)
+  displayName: "Push to GitHub"
+
+#Step 6: Install Github cli
+- script: |
+    # Install GitHub CLI
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+    sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+    sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt update
+    sudo apt install gh -y
+  displayName: "Install GitHub CLI"
+
+# Step 6: Create a pull request using GitHub REST API
+- script: |
+    # Authenticate with GitHub using SSH
+     cd SyncGithubProject
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_rsa
+    git config --global url."git@github.com:".insteadOf "https://github.com/"
+    echo "SSH Authentication configured"
+    gh auth login -p ssh
+    gh pr create \
+      --title "Amazing new feature" \
+      --body "Please pull these awesome changes in!" \
+      --head "feature/azure-pipeline-$(Build.BuildId)" \
+      --base "main"
+  displayName: "Make Github PR"
