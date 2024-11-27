@@ -80,6 +80,7 @@ steps:
     ssh-add ~/.ssh/id_rsa
     git config --global url."git@github.com:".insteadOf "https://github.com/"
     echo "SSH Authentication configured"
+    gh auth login -p ssh
     gh pr create \
       --title "Amazing new feature" \
       --body "Please pull these awesome changes in!" \
