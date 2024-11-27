@@ -31,6 +31,11 @@ steps:
     git checkout -b feature/azure-pipeline-$(Build.BuildId)
   displayName: "Create new branch"
 
+# Step 4: Download the secure file
+- task: DownloadSecureFile@1
+  inputs:
+    secureFile: 'github_key'
+
 #Step Debug: Check Agent Temp Directory contents
 - script: |
     ls -la $(Agent.TempDirectory)
