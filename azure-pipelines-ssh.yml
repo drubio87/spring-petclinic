@@ -79,7 +79,6 @@ steps:
     eval "$(ssh-agent -s)"
     ssh-add ~/.ssh/id_rsa
     git config --global url."git@github.com:".insteadOf "https://github.com/"
-    ssh -T git@github.com || exit 1
     echo "SSH Authentication configured"
     gh pr create \
       --title "Amazing new feature" \
