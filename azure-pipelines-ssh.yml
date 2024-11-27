@@ -31,10 +31,20 @@ steps:
     git checkout -b feature/azure-pipeline-$(Build.BuildId)
   displayName: "Create new branch"
 
+#Step Debug: Check Agent Temp Directory contents
+- script: |
+    ls -la $(Agent.TempDirectory)
+  displayName: 'Debug Temp Directory'
+
 # Step 4: Setub SSH Key
 - script: |
     mkdir -p ~/.ssh
-    cp $(Agent.TempDirectory)/github_key ~/.ssh/id_rsa
+    if [ -f "$(Agent.TempDirectory)/github_key" ]; then
+        cp $(Agent.TempDirectory)/github_key ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+    else
+        echo "SSH key not found in $(Agent.TempDirectory)/github_key" && exit 1
+    fi
     echo "Host github.com" >> ~/.ssh/config
     echo "  StrictHostKeyChecking no" >> ~/.ssh/config
   displayName: "Setup SSH Key"
