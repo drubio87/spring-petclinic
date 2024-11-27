@@ -58,7 +58,7 @@ steps:
 # Step 5: Push changes to the new branch on GitHub
 - script: |
      cd SyncGithubProject
-     git remote add github https://github.com/drubio87/spring-petclinic.git
+     git remote add github git@github.com:drubio87/spring-petclinic.git
      git push --no-thin github feature/azure-pipeline-$(Build.BuildId)
   displayName: "Push to GitHub"
 
