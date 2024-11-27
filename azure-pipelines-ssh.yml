@@ -73,16 +73,6 @@ steps:
     sudo apt install gh -y
   displayName: "Install GitHub CLI"
 
-#Step 6: Authenticate wit Github using SSH
-- script: |
-    gh pr create \
-      --title "Amazing new feature" \
-      --body "Please pull these awesome changes in!" \
-      --head "feature/azure-pipeline-$(Build.BuildId)" \
-      --base "main" \
-      --repo org-name/repo-name
-  displayName: "Make Github PR"
-
 # Step 6: Create a pull request using GitHub REST API
 - script: |
     curl -L -X POST -H "Accept: application/vnd.github+json" \
