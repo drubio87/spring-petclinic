@@ -75,10 +75,6 @@ steps:
 
 #Step 6: Authenticate wit Github using SSH
 - script: |
-    # Authenticate with GitHub using SSH
-    eval "$(ssh-agent -s)"
-    ssh-add ~/.ssh/id_rsa
-    ssh -T git@github.com || exit 1
     gh pr create \
       --title "Amazing new feature" \
       --body "Please pull these awesome changes in!" \
